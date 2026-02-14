@@ -7,8 +7,10 @@ A Progressive Web App built with Next.js and Redux Toolkit that allows users to 
 
 ## Phase 1: Project Scaffolding
 - Initialize Next.js 14+ with TypeScript (App Router)
+- Install and configure **Tailwind CSS v3** with PostCSS and Autoprefixer
+- Configure `tailwind.config.ts` with custom theme (colors, fonts, spacing, animations)
 - Configure ESLint with security rules (`eslint-plugin-security`)
-- Configure Prettier
+- Configure Prettier with `prettier-plugin-tailwindcss` (auto-sorts classes)
 - Set up path aliases (`@/components`, `@/store`, `@/types`, etc.)
 - Add `.gitignore`, `.editorconfig`
 - **Static export** config (`output: 'export'`) for GitHub Pages compatibility
@@ -59,25 +61,38 @@ interface Tag {
 }
 ```
 
-## Phase 4: Core UI Components
-- **Layout**: Sidebar + Main content area (responsive)
-- **TaskList**: Filterable, sortable list of tasks
-- **TaskCard**: Summary card with status, priority, progress bar
-- **TaskDetail**: Full task view/edit with subtask management
-- **TaskForm**: Create/edit task modal/page
-- **SubtaskList**: Checkbox list within TaskDetail
-- **GroupManager**: Create/edit/delete groups
-- **TagManager**: Create/edit/delete tags
-- **SearchBar**: Full-text search across tasks
-- Use CSS Modules or Tailwind CSS for styling (no external UI library needed)
+## Phase 4: Core UI Components (Tailwind CSS Styling)
+All components styled with **Tailwind CSS** — no external UI library.
 
-## Phase 5: Dashboard Views
-- **List View**: Default table/list of all tasks with sorting & filtering
-- **Board View**: Kanban-style columns by status (todo/in_progress/done)
-- **Group View**: Tasks organized by group
-- **Tag View**: Tasks filtered/grouped by tags
-- **Stats Panel**: Task completion stats, overdue count, priority distribution
-- View switcher in the dashboard header
+### Design System (Tailwind Theme)
+- **Colors**: Indigo/violet primary palette, slate neutrals, semantic colors for status/priority
+- **Typography**: Inter font via `next/font`, clear hierarchy (`text-xs` to `text-3xl`)
+- **Spacing**: Consistent 4px grid (`p-2`, `p-4`, `gap-3`, `gap-6`)
+- **Borders**: Subtle `rounded-xl` cards, `ring` focus states for accessibility
+- **Shadows**: Layered `shadow-sm` / `shadow-md` / `shadow-lg` for depth
+- **Transitions**: `transition-all duration-200` on interactive elements
+- **Dark mode**: `dark:` variants using Tailwind's `class` strategy + system preference detection
+
+### Components
+- **Layout**: Collapsible sidebar (`w-64` → `w-16`) + main content area, fully responsive with `md:` breakpoints
+- **TaskList**: Filterable, sortable list with `divide-y` separators, hover states (`hover:bg-slate-50`)
+- **TaskCard**: Rounded card with colored priority indicator (left border), status badge (`rounded-full` pill), subtask progress bar (`bg-gradient-to-r`)
+- **TaskDetail**: Slide-over panel or full page, clean form inputs with `focus:ring-2 focus:ring-indigo-500`
+- **TaskForm**: Modal with `backdrop-blur-sm` overlay, grouped form sections
+- **SubtaskList**: Checkbox list with strikethrough animation on completion
+- **GroupManager**: Color-coded group chips with dropdown color picker
+- **TagManager**: Pill-shaped tags (`rounded-full px-3 py-1`) with assigned colors
+- **SearchBar**: `pl-10` with search icon, `focus-within:` ring highlight
+- **Buttons**: Primary (`bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg`), secondary (outline), destructive (red), icon-only variants
+- **Empty states**: Centered illustrations/icons with descriptive text and CTA button
+
+## Phase 5: Dashboard Views (Tailwind CSS Styling)
+- **View Switcher**: Segmented control bar (`inline-flex rounded-lg bg-slate-100 p-1`) in the dashboard header
+- **List View**: Clean table with `divide-y divide-slate-200`, sortable column headers with hover indicators, alternating row hover states
+- **Board View**: Kanban columns with `bg-slate-50 rounded-xl` containers, draggable cards with `shadow-sm hover:shadow-md` lift effect, column headers with task count badges
+- **Group View**: Collapsible sections per group, group color as left accent bar, task count per group
+- **Tag View**: Tag filter bar at top (`flex flex-wrap gap-2`), active tag highlighted with `ring-2`, filtered task grid below
+- **Stats Panel**: Grid of stat cards (`grid grid-cols-2 lg:grid-cols-4 gap-4`) with large numbers, trend indicators, mini progress rings/bars using Tailwind gradients
 
 ## Phase 6: PWA Setup
 - `next-pwa` or manual service worker with Workbox
@@ -91,7 +106,7 @@ interface Tag {
 - Since data lives in localStorage (client-only), SSR renders the **app shell** (layout, navigation, empty states)
 - Use `'use client'` directives for Redux-connected components
 - Server components for layout, static content, metadata
-- `loading.tsx` skeletons for perceived performance
+- `loading.tsx` skeleton screens using Tailwind `animate-pulse` with `bg-slate-200 rounded` placeholders
 - Dynamic imports with `next/dynamic` for heavy components (board view, charts)
 - Metadata API for SEO tags
 
@@ -157,10 +172,40 @@ Hardening measures:
 - Component tests for key UI flows
 - Lighthouse audit (PWA score, performance, accessibility)
 - Accessibility: ARIA labels, keyboard navigation, focus management
-- Dark mode support (CSS custom properties + system preference detection)
-- Responsive design verification
+- **Dark mode**: Tailwind `dark:` class strategy, toggle in header, respects `prefers-color-scheme`, smooth `transition-colors duration-300`
+- **Responsive design**: Mobile-first (`sm:`, `md:`, `lg:`, `xl:` breakpoints), sidebar collapses to bottom nav on mobile, board view scrolls horizontally on small screens
 
 ---
+
+## Tailwind CSS Theme Configuration
+```typescript
+// tailwind.config.ts (key customizations)
+{
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        primary: colors.indigo,      // Main action color
+        accent: colors.violet,       // Secondary accents
+        success: colors.emerald,     // Done / completed
+        warning: colors.amber,       // In progress / medium priority
+        danger: colors.rose,         // High priority / destructive
+      },
+      fontFamily: {
+        sans: ['Inter', ...defaultTheme.fontFamily.sans],
+      },
+      animation: {
+        'slide-in': 'slideIn 0.2s ease-out',
+        'fade-in': 'fadeIn 0.15s ease-in',
+      },
+      keyframes: {
+        slideIn: { '0%': { transform: 'translateX(100%)' }, '100%': { transform: 'translateX(0)' } },
+        fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
+      },
+    },
+  },
+}
+```
 
 ## File Structure
 ```
@@ -195,6 +240,8 @@ NextJS/
 │       └── useAppSelector.ts
 ├── Dockerfile
 ├── .dockerignore
+├── tailwind.config.ts
+├── postcss.config.js
 ├── next.config.js
 ├── tsconfig.json
 ├── package.json
