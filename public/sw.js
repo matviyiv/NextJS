@@ -1,21 +1,18 @@
 const CACHE_NAME = 'taskflow-v1';
-const OFFLINE_URL = '/offline.html';
-
-// Assets to cache on install
-const CACHE_ASSETS = [
-  '/',
-  '/offline.html',
-  '/manifest.json',
-  '/icons/icon-192.svg',
-  '/icons/icon-512.svg'
-];
 
 // Install event - cache app shell
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       console.log('[Service Worker] Caching app shell');
-      return cache.addAll(CACHE_ASSETS);
+      // Use relative paths so it works under any basePath
+      return cache.addAll([
+        './',
+        './offline.html',
+        './manifest.json',
+        './icons/icon-192.svg',
+        './icons/icon-512.svg'
+      ]);
     })
   );
   self.skipWaiting();
@@ -28,7 +25,6 @@ self.addEventListener('activate', (event) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
           if (cacheName !== CACHE_NAME) {
-            console.log('[Service Worker] Deleting old cache:', cacheName);
             return caches.delete(cacheName);
           }
         })
@@ -38,22 +34,15 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Fetch event - cache-first for static assets, network-first for pages
+// Fetch event
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // Skip non-GET requests
-  if (request.method !== 'GET') {
-    return;
-  }
+  if (request.method !== 'GET') return;
+  if (!url.protocol.startsWith('http')) return;
 
-  // Skip chrome-extension and other non-http(s) requests
-  if (!url.protocol.startsWith('http')) {
-    return;
-  }
-
-  // Cache-first strategy for static assets
+  // Cache-first for static assets
   if (
     request.destination === 'image' ||
     request.destination === 'style' ||
@@ -62,16 +51,11 @@ self.addEventListener('fetch', (event) => {
     url.pathname.match(/\.(svg|png|jpg|jpeg|gif|webp|css|js|woff|woff2|ttf|otf)$/)
   ) {
     event.respondWith(
-      caches.match(request).then((cachedResponse) => {
-        if (cachedResponse) {
-          return cachedResponse;
-        }
+      caches.match(request).then((cached) => {
+        if (cached) return cached;
         return fetch(request).then((response) => {
-          // Clone the response before caching
-          const responseToCache = response.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(request, responseToCache);
-          });
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
           return response;
         });
       })
@@ -79,28 +63,21 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Network-first strategy for pages with offline fallback
+  // Network-first for pages
   event.respondWith(
     fetch(request)
       .then((response) => {
-        // Clone and cache successful responses
         if (response.status === 200) {
-          const responseToCache = response.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(request, responseToCache);
-          });
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
         }
         return response;
       })
       .catch(() => {
-        // Try to return cached version
-        return caches.match(request).then((cachedResponse) => {
-          if (cachedResponse) {
-            return cachedResponse;
-          }
-          // Return offline page for navigation requests
+        return caches.match(request).then((cached) => {
+          if (cached) return cached;
           if (request.destination === 'document') {
-            return caches.match(OFFLINE_URL);
+            return caches.match('./offline.html');
           }
         });
       })
