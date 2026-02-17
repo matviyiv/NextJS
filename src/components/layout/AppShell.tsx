@@ -28,7 +28,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             onClick={() => dispatch(toggleSidebar())}
           />
           <div className="relative z-50 h-full w-64 animate-slide-in">
-            <Sidebar />
+            <Sidebar onNavigate={() => dispatch(toggleSidebar())} />
           </div>
         </div>
       )}

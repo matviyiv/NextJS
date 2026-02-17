@@ -44,20 +44,24 @@ const viewModes: { mode: ViewMode; label: string; icon: React.ReactNode }[] = [
   },
 ];
 
-export default function Sidebar() {
+interface SidebarProps {
+  onNavigate?: () => void;
+}
+
+export default function Sidebar({ onNavigate }: SidebarProps) {
   const dispatch = useAppDispatch();
   const viewMode = useAppSelector((s) => s.ui.viewMode);
   const darkMode = useAppSelector((s) => s.ui.darkMode);
   const groups = useAppSelector((s) => s.groups.items);
   const tags = useAppSelector((s) => s.tags.items);
-  const sidebarOpen = useAppSelector((s) => s.ui.sidebarOpen);
+
+  const nav = (action: () => void) => {
+    action();
+    onNavigate?.();
+  };
 
   return (
-    <aside
-      className={`flex h-full flex-col border-r border-border bg-surface transition-all duration-300 ${
-        sidebarOpen ? "w-64" : "w-16"
-      }`}
-    >
+    <aside className="flex h-full w-64 flex-col border-r border-border bg-surface">
       {/* Logo */}
       <div className="flex h-16 items-center gap-3 border-b border-border px-4">
         <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary-600 text-white">
@@ -65,26 +69,24 @@ export default function Sidebar() {
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
         </div>
-        {sidebarOpen && (
-          <span className="text-lg font-bold text-text-primary">TaskFlow</span>
-        )}
+        <span className="text-lg font-bold text-text-primary">TaskFlow</span>
       </div>
 
       {/* Views */}
       <nav className="flex-1 overflow-y-auto p-3">
         <div className="mb-6">
-          {sidebarOpen && (
-            <p className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-text-tertiary">
-              Views
-            </p>
-          )}
+          <p className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-text-tertiary">
+            Views
+          </p>
           {viewModes.map(({ mode, label, icon }) => (
             <button
               key={mode}
-              onClick={() => {
-                dispatch(setViewMode(mode));
-                dispatch(clearFilters());
-              }}
+              onClick={() =>
+                nav(() => {
+                  dispatch(setViewMode(mode));
+                  dispatch(clearFilters());
+                })
+              }
               className={`mb-1 flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
                 viewMode === mode
                   ? "bg-primary-50 text-primary-700"
@@ -92,59 +94,59 @@ export default function Sidebar() {
               }`}
             >
               {icon}
-              {sidebarOpen && label}
+              {label}
             </button>
           ))}
         </div>
 
         {/* Groups */}
-        {sidebarOpen && (
-          <div className="mb-6">
-            <p className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-text-tertiary">
-              Groups
-            </p>
-            {groups.map((group) => (
-              <button
-                key={group.id}
-                onClick={() => {
+        <div className="mb-6">
+          <p className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-text-tertiary">
+            Groups
+          </p>
+          {groups.map((group) => (
+            <button
+              key={group.id}
+              onClick={() =>
+                nav(() => {
                   dispatch(setViewMode("group"));
                   dispatch(setFilters({ groupId: group.id }));
-                }}
-                className="mb-1 flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-text-secondary transition-colors hover:bg-surface-tertiary hover:text-text-primary"
+                })
+              }
+              className="mb-1 flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-text-secondary transition-colors hover:bg-surface-tertiary hover:text-text-primary"
+            >
+              <span
+                className="h-3 w-3 shrink-0 rounded-full"
+                style={{ backgroundColor: group.color }}
+              />
+              {group.name}
+            </button>
+          ))}
+        </div>
+
+        {/* Tags */}
+        <div className="mb-6">
+          <p className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-text-tertiary">
+            Tags
+          </p>
+          <div className="flex flex-wrap gap-1.5 px-3">
+            {tags.map((tag) => (
+              <button
+                key={tag.id}
+                onClick={() =>
+                  nav(() => {
+                    dispatch(setViewMode("tag"));
+                    dispatch(setFilters({ tagIds: [tag.id] }));
+                  })
+                }
+                className="rounded-full px-2.5 py-0.5 text-xs font-medium text-white transition-opacity hover:opacity-80"
+                style={{ backgroundColor: tag.color }}
               >
-                <span
-                  className="h-3 w-3 shrink-0 rounded-full"
-                  style={{ backgroundColor: group.color }}
-                />
-                {group.name}
+                {tag.name}
               </button>
             ))}
           </div>
-        )}
-
-        {/* Tags */}
-        {sidebarOpen && (
-          <div className="mb-6">
-            <p className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-text-tertiary">
-              Tags
-            </p>
-            <div className="flex flex-wrap gap-1.5 px-3">
-              {tags.map((tag) => (
-                <button
-                  key={tag.id}
-                  onClick={() => {
-                    dispatch(setViewMode("tag"));
-                    dispatch(setFilters({ tagIds: [tag.id] }));
-                  }}
-                  className="rounded-full px-2.5 py-0.5 text-xs font-medium text-white transition-opacity hover:opacity-80"
-                  style={{ backgroundColor: tag.color }}
-                >
-                  {tag.name}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
+        </div>
       </nav>
 
       {/* Dark mode toggle */}
@@ -162,7 +164,7 @@ export default function Sidebar() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
             </svg>
           )}
-          {sidebarOpen && (darkMode ? "Light Mode" : "Dark Mode")}
+          {darkMode ? "Light Mode" : "Dark Mode"}
         </button>
       </div>
     </aside>
