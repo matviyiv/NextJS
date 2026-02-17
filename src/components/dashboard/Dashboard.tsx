@@ -19,9 +19,11 @@ export default function Dashboard() {
 
   const viewLabels = { list: "List View", board: "Board View", group: "Group View", tag: "Tag View" };
 
+  const handleAddTask = () => setShowNewTask(true);
+
   return (
     <AppShell>
-      <Header onAddTask={() => setShowNewTask(true)} />
+      <Header onAddTask={handleAddTask} />
       <div className="flex-1 overflow-auto p-6">
         <StatsPanel />
 
@@ -29,7 +31,7 @@ export default function Dashboard() {
           <h2 className="text-lg font-semibold text-text-primary">{viewLabels[viewMode]}</h2>
         </div>
 
-        {viewMode === "list" && <ListView />}
+        {viewMode === "list" && <ListView onAddTask={handleAddTask} />}
         {viewMode === "board" && <BoardView />}
         {viewMode === "group" && <GroupView />}
         {viewMode === "tag" && <TagView />}

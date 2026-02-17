@@ -14,7 +14,11 @@ const columns: { field: SortField; label: string }[] = [
   { field: "createdAt", label: "Created" },
 ];
 
-export default function ListView() {
+interface ListViewProps {
+  onAddTask: () => void;
+}
+
+export default function ListView({ onAddTask }: ListViewProps) {
   const tasks = useFilteredTasks();
   const dispatch = useAppDispatch();
   const { sortField, sortDirection } = useAppSelector((s) => s.ui);
@@ -29,6 +33,7 @@ export default function ListView() {
         }
         title="No tasks yet"
         description="Create your first task to get started with organizing your work."
+        action={{ label: "Add Task", onClick: onAddTask }}
       />
     );
   }

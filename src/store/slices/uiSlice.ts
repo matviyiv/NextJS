@@ -22,7 +22,7 @@ const initialState: UiState = {
     tagIds: [],
     search: "",
   },
-  sidebarOpen: true,
+  sidebarOpen: false,
   darkMode: false,
   editingTaskId: null,
 };

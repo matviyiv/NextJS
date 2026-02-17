@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "@/hooks/useAppSelector";
 import { addTask, updateTask } from "@/store/slices/tasksSlice";
 import { Task } from "@/types";
@@ -22,13 +22,26 @@ export default function TaskForm({ open, onClose, existingTask }: TaskFormProps)
   const groups = useAppSelector((s) => s.groups.items);
   const tags = useAppSelector((s) => s.tags.items);
 
-  const [title, setTitle] = useState(existingTask?.title || "");
-  const [description, setDescription] = useState(existingTask?.description || "");
-  const [status, setStatus] = useState<Task["status"]>(existingTask?.status || "todo");
-  const [priority, setPriority] = useState<Task["priority"]>(existingTask?.priority || "medium");
-  const [groupId, setGroupId] = useState(existingTask?.groupId || "");
-  const [selectedTags, setSelectedTags] = useState<string[]>(existingTask?.tagIds || []);
-  const [dueDate, setDueDate] = useState(existingTask?.dueDate || "");
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [status, setStatus] = useState<Task["status"]>("todo");
+  const [priority, setPriority] = useState<Task["priority"]>("medium");
+  const [groupId, setGroupId] = useState("");
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [dueDate, setDueDate] = useState("");
+
+  // Reset form state whenever the modal opens or the task being edited changes
+  useEffect(() => {
+    if (open) {
+      setTitle(existingTask?.title || "");
+      setDescription(existingTask?.description || "");
+      setStatus(existingTask?.status || "todo");
+      setPriority(existingTask?.priority || "medium");
+      setGroupId(existingTask?.groupId || "");
+      setSelectedTags(existingTask?.tagIds || []);
+      setDueDate(existingTask?.dueDate || "");
+    }
+  }, [open, existingTask]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -147,24 +160,25 @@ export default function TaskForm({ open, onClose, existingTask }: TaskFormProps)
         <div>
           <label className="mb-2 block text-sm font-medium text-text-primary">Tags</label>
           <div className="flex flex-wrap gap-2">
-            {tags.map((tag) => (
-              <button
-                key={tag.id}
-                type="button"
-                onClick={() => toggleTag(tag.id)}
-                className={`rounded-full px-3 py-1 text-xs font-medium transition-all ${
-                  selectedTags.includes(tag.id)
-                    ? "text-white ring-2 ring-offset-1"
-                    : "opacity-50 hover:opacity-80"
-                }`}
-                style={{
-                  backgroundColor: tag.color,
-                  ...(selectedTags.includes(tag.id) ? { boxShadow: `0 0 0 2px ${tag.color}` } : {}),
-                }}
-              >
-                {tag.name}
-              </button>
-            ))}
+            {tags.map((tag) => {
+              const isSelected = selectedTags.includes(tag.id);
+              return (
+                <button
+                  key={tag.id}
+                  type="button"
+                  onClick={() => toggleTag(tag.id)}
+                  className={`rounded-full px-3 py-1 text-xs font-medium text-white transition-all ${
+                    isSelected ? "ring-2 ring-offset-1" : "opacity-50 hover:opacity-80"
+                  }`}
+                  style={{
+                    backgroundColor: tag.color,
+                    ...(isSelected ? { boxShadow: `0 0 0 2px ${tag.color}` } : {}),
+                  }}
+                >
+                  {tag.name}
+                </button>
+              );
+            })}
           </div>
         </div>
 

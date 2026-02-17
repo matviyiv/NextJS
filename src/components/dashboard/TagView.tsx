@@ -33,7 +33,7 @@ export default function TagView() {
             }`}
             style={{
               backgroundColor: tag.color,
-              ...(activeTagIds.includes(tag.id) ? { ringColor: tag.color } : {}),
+              ...(activeTagIds.includes(tag.id) ? { boxShadow: `0 0 0 2px white, 0 0 0 4px ${tag.color}` } : {}),
             }}
           >
             {tag.name}
