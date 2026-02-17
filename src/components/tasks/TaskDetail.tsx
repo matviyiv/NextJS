@@ -15,7 +15,7 @@ export default function TaskDetail() {
   );
   const groups = useAppSelector((s) => s.groups.items);
   const tags = useAppSelector((s) => s.tags.items);
-  const [editing, setEditing] = useState(false);
+  const [showEditForm, setShowEditForm] = useState(false);
 
   if (!task) return null;
 
@@ -27,13 +27,17 @@ export default function TaskDetail() {
     dispatch(setEditingTaskId(null));
   };
 
-  const handleClose = () => dispatch(setEditingTaskId(null));
+  const handleClose = () => {
+    setShowEditForm(false);
+    dispatch(setEditingTaskId(null));
+  };
 
-  if (editing) {
+  // Show the edit form as a modal on top
+  if (showEditForm) {
     return (
       <TaskForm
         open={true}
-        onClose={() => setEditing(false)}
+        onClose={() => setShowEditForm(false)}
         existingTask={task}
       />
     );
@@ -47,7 +51,7 @@ export default function TaskDetail() {
       <div className="mx-4 w-full max-w-lg animate-scale-in rounded-2xl bg-surface p-6 shadow-xl">
         {/* Header */}
         <div className="mb-4 flex items-start justify-between">
-          <div className="flex-1">
+          <div className="flex-1 pr-4">
             <h2 className="text-lg font-semibold text-text-primary">{task.title}</h2>
             {task.description && (
               <p className="mt-1 text-sm text-text-secondary">{task.description}</p>
@@ -55,7 +59,7 @@ export default function TaskDetail() {
           </div>
           <button
             onClick={handleClose}
-            className="rounded-lg p-1.5 text-text-tertiary transition-colors hover:bg-surface-tertiary hover:text-text-primary"
+            className="shrink-0 rounded-lg p-1.5 text-text-tertiary transition-colors hover:bg-surface-tertiary hover:text-text-primary"
           >
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -122,7 +126,7 @@ export default function TaskDetail() {
             Delete
           </button>
           <button
-            onClick={() => setEditing(true)}
+            onClick={() => setShowEditForm(true)}
             className="rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-700"
           >
             Edit
