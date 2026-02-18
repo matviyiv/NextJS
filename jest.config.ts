@@ -16,6 +16,7 @@ const config: Config = {
   transformIgnorePatterns: [
     "node_modules/(?!(uuid|@reduxjs/toolkit)/)",
   ],
+  testPathIgnorePatterns: ["/node_modules/", "test-utils"],
   setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
 };
 
