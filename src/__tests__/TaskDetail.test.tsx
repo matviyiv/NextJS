@@ -1,5 +1,4 @@
 import { screen, fireEvent } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import TaskDetail from "@/components/tasks/TaskDetail";
 import { renderWithStore } from "./test-utils";
 

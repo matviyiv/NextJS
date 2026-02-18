@@ -7,8 +7,13 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "lint:staged": "lint-staged",
     "test": "jest",
     "prepare": "git config core.hooksPath .githooks"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": "eslint --max-warnings=0",
+    "*.{js,mjs}": "eslint --max-warnings=0"
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.11.2",
@@ -33,6 +38,7 @@
     "eslint-config-next": "16.1.6",
     "jest": "^30.2.0",
     "jest-environment-jsdom": "^30.2.0",
+    "lint-staged": "^16.2.7",
     "tailwindcss": "^4",
     "ts-jest": "^29.4.6",
     "typescript": "^5"

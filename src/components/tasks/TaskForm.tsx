@@ -33,6 +33,7 @@ export default function TaskForm({ open, onClose, existingTask }: TaskFormProps)
   // Reset form state whenever the modal opens or the task being edited changes
   useEffect(() => {
     if (open) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional sync of form state from props on open
       setTitle(existingTask?.title || "");
       setDescription(existingTask?.description || "");
       setStatus(existingTask?.status || "todo");

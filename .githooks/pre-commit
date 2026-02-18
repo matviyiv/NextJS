@@ -1,0 +1,11 @@
+#!/bin/sh
+
+echo "Running lint-staged on changed files..."
+npx lint-staged
+
+if [ $? -ne 0 ]; then
+  echo "Lint-staged failed. Commit aborted."
+  exit 1
+fi
+
+echo "Lint check passed."

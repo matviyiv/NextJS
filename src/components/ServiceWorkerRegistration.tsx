@@ -10,7 +10,7 @@ export function ServiceWorkerRegistration() {
         navigator.serviceWorker
           .register(`${basePath}/sw.js`)
           .then((registration) => {
-            console.log('Service Worker registered:', registration.scope);
+            console.warn('Service Worker registered:', registration.scope);
             registration.update();
           })
           .catch((error) => {
