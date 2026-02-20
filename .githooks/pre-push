@@ -8,4 +8,14 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-echo "All tests passed. Pushing..."
+echo "All tests passed."
+
+echo "Running npm audit (production dependencies)..."
+npm audit --omit=dev --audit-level=moderate
+
+if [ $? -ne 0 ]; then
+  echo "npm audit found vulnerabilities. Push aborted."
+  exit 1
+fi
+
+echo "Audit passed. Pushing..."
