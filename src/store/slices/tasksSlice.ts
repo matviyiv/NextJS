@@ -65,9 +65,24 @@ const tasksSlice = createSlice({
         task.updatedAt = new Date().toISOString();
       }
     },
+    importTasks(state, action: PayloadAction<Task[]>) {
+      const now = new Date().toISOString();
+      for (const task of action.payload) {
+        state.items.push({
+          ...task,
+          id: uuidv4(),
+          subtasks: task.subtasks.map((s) => ({
+            ...s,
+            id: uuidv4(),
+          })),
+          createdAt: now,
+          updatedAt: now,
+        });
+      }
+    },
   },
 });
 
-export const { addTask, updateTask, deleteTask, addSubtask, toggleSubtask, deleteSubtask } =
+export const { addTask, updateTask, deleteTask, addSubtask, toggleSubtask, deleteSubtask, importTasks } =
   tasksSlice.actions;
 export default tasksSlice.reducer;
